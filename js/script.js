@@ -26,7 +26,7 @@ $(document).ready(function(){
   const $signInfo = $('#sign-info');
   const $hovershadow = $('.hover-shadow');
   const $messageField = $('#messageInput');
-  const $messageList = $('#example-message');
+  const $messageList = $('#example-messages');
   const $profileEmail = $('#profile-email');
 
   // Hovershadow
@@ -182,7 +182,7 @@ $(document).ready(function(){
   firebase.auth().onAuthStateChanged(function(user){
     if(user) {
       console.log('SignIn '+user.email);
-      $signInfo.html(user.email+" is login...");
+      $signInfo.html(user.email+"  is login...");
       $btnSignIn.attr('disabled', 'disabled');
       $btnSignOut.removeAttr('disabled')
 
@@ -190,14 +190,23 @@ $(document).ready(function(){
       dbChatRoom.limitToLast(10).on('child_added', function (snapshot) {
         //GET DATA
         var data = snapshot.val();
-        var username = data.name || "anonymous";
-        var message = data.text;
+        var username = data.username;
+        var message = data.message;
+        var photoURL = snapshot.val().photoURL;
 
         //CREATE ELEMENTS MESSAGE & SANITIZE TEXT
         var $messageElement = $("<li>");
+        ////////////////////////////////////////////////////////
+        var $photoElement = $("<img src='' class='messageList-photo'>");
+        $photoElement.attr('src', photoURL);
+/////////////////////////////////////////////////////////////////////////////////////////////////
         var $nameElement = $("<strong class='example-chat-username'></strong>");
+
         $nameElement.text(username);
+        $nameElement.prepend($photoElement);
         $messageElement.text(message).prepend($nameElement);
+/////////////////////////////////////////////////////////////////////
+
 
         //ADD MESSAGE
         $messageList.append($messageElement)
@@ -218,8 +227,9 @@ $(document).ready(function(){
       var message = $messageField.val();
       console.log(typeName);
       console.log(message);
+      console.log(photoURL);
       //SAVE DATA TO FIREBASE AND EMPTY FIELD
-      dbChatRoom.push({username: typeName, message: message});
+      dbChatRoom.push({username: typeName, message: message, photoURL: photoURL});
       $messageField.val('');
     }
   });
